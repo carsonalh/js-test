@@ -1,46 +1,11 @@
-function sum(a, b) {
-    return a + b;
-}
+module.exports = {};
 
-let globalError = false;
+let state = {
+    call: null,
+    error: null,
+};
 
-runTestSuite({
-    sum: {
-        worksForSingleCase() {
-            let a, b;
-            a = 2;
-            b = 3;
-            expectEqual(5, sum(a, b));
-        },
-        worksForAnotherCase() {
-            let a, b;
-            a = 2;
-            b = -1;
-            expectEqual(1, sum(a, b));
-        },
-        worksForOneMoreCase() {
-            let a, b;
-            a = 2;
-            b = -2;
-            expectEqual(0, sum(a, b));
-        },
-        sub: {
-            inner: {
-                hereIsAnotherTest() {
-                    expectEqual(-1, 1);
-                },
-            },
-        },
-    },
-});
-
-function expectEqual(expected, actual) {
-    if (expected !== actual) {
-        globalError = true;
-    }
-}
-
-function runTestSuite(tests) {
+module.exports.runTestSuite = function(tests) {
     let stack = [{
         items: Object
                 .keys(tests)
@@ -60,13 +25,14 @@ function runTestSuite(tests) {
                         .map(el => el.items[el.nextIndex - 1].key)
                         .concat([ name ])
                         .join('::');
-                console.log(`Running test ${identifier}`);
+                state.call = {
+                    name: identifier,
+                };
+                state.error = null;
                 test();
                 // TODO Extract the error handling/reporting later on
-                if (globalError) {
-                    console.log('There was an error.');
-                    // Note: This is the only artificial way this loop can exit
-                    break;
+                if (state.error) {
+                    console.log(state.error.message);
                 }
             } else if (typeof top.items[i].value == 'object') {
                 // This is a test sub-suite, push it to the stack
@@ -86,4 +52,53 @@ function runTestSuite(tests) {
         }
     }
 }
+
+module.exports.expectFalsey = function (value) {
+    if (!!value) {
+        let message = `[${state.call.name}][expectFalsey]: Expected falsey value, but received ${value}`;
+        state.error = { message, };
+    }
+};
+
+module.exports.expectTruthy = function (value) {
+    if (!value) {
+        let message = `[${state.call.name}][expectTruthy]: Expected truthy value, but received ${value}`;
+        state.error = { message, };
+    }
+};
+
+module.exports.expectLess = function (threshold, value) {
+    if (value >= threshold) {
+        let message = `[${state.call.name}][expectLess]: Expected less than ${threshold}, but received ${value}`;
+        state.error = { message, };
+    }
+};
+
+module.exports.expectGreater = function (threshold, value) {
+    if (value <= threshold) {
+        let message = `[${state.call.name}][expectGreater]: Expected greater than ${threshold}, but received ${value}`;
+        state.error = { message, };
+    }
+};
+
+module.exports.expectUndefined = function (value) {
+    if (value !== undefined) {
+        let message = `[${state.call.name}][expectUndefined]: Expected undefined, but received ${value}`;
+        state.error = { message, };
+    }
+};
+
+module.exports.expectNull = function (value) {
+    if (value !== null) {
+        let message = `[${state.call.name}][expectNull]: Expected null, but received ${value}`;
+        state.error = { message, };
+    }
+};
+
+module.exports.expectEqual = function (expected, actual) {
+    if (expected !== actual) {
+        let message = `[${state.call.name}][expectEqual]: Expected ${expected}, but received ${actual}`;
+        state.error = { message, };
+    }
+};
 
