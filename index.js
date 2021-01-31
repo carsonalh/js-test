@@ -1,10 +1,5 @@
 module.exports = {};
 
-let state = {
-    call: null,
-    error: null,
-};
-
 const expects = {
     expectFalsey(value) {
         if (!!value) {
