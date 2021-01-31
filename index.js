@@ -1,5 +1,77 @@
 module.exports = {};
 
+/**
+ * This `MockFunction` class is a utility for creating spys and stubs in a unit
+ * test. To make a mock method, simply set one of these functions as the value
+ * of the object whose method is to be mocked.
+ *
+ * Example:
+ * ```
+ * // Let's say we're testing a function that processes a HTTP request, and we
+ * // need to make a function that simulates the HTTP request for our test.
+ * const getHttpRequestStub =
+ *         mockFunction(this)
+ *         .returnValue('<your http request>');
+ *
+ * // Then, to pass the function to your code under test, use the `fn` property,
+ * // like so:
+ * someCustomFunction(getHttpRequestStub.fn);
+ *
+ * // Or, say you want a spy function that makes sure your HTTP parser is
+ * // passing on the data that it should be
+ * const getParsedHttpRequestSpy =
+ *         mockFunction(this)
+ *         .expectCall([<first expected arg>, <second expected arg>, ...]);
+ * ```
+ */
+module.exports.mockFunction = function(testInstance) {
+    let state = {
+        _testInstance: testInstance,
+        _returnValue: undefined,
+        _expectedArguments: null,
+    };
+
+    let mock = function() {
+        let aList = [];
+        for (const a of arguments) {
+            aList.push(a);
+        }
+        if (state._expectedArguments) {
+            if (state._expectedArguments.length !== aList.length) {
+                let message = `[${state._testInstance.call.name}][mockFunction]: Expected ${state._expectedArguments.length} arguments, but received ${aList.length}`;
+                state._testInstance.error.messages.push(message);
+            } else {
+                let i;
+                for (i = 0; i < aList.length; ++i) {
+                    if (aList[i] !== state._expectedArguments[i]) {
+                        let message = `[${state._testInstance.call.name}][mockFunction]: Expected argument ${i + 1} to be ${state._expectedArguments[i]}, but received ${aList[i]}`;
+                        state._testInstance.error.messages.push(message);
+                    }
+                }
+            }
+        }
+        return state._returnValue;
+    };
+
+    mock.expectCall = function() {
+        state._expectedArguments = [];
+        for (const a of arguments) {
+            state._expectedArguments.push(a);
+        }
+        return mock;
+    };
+
+    mock.returnValue = function(value) {
+        state._returnValue = value;
+        return mock;
+    };
+
+    return mock;
+};
+
+module.exports.createMock = function(testInstance) {
+};
+
 const expects = {
     expectFalsey(value) {
         if (!!value) {

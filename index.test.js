@@ -1,4 +1,4 @@
-const { runTestSuite } = require('.');
+const { runTestSuite, mockFunction } = require('.');
 
 runTestSuite({
     jstest: {
@@ -92,6 +92,28 @@ runTestSuite({
             },
             async expectLess() {
                 this.expectLess(0, 1);
+            },
+        },
+        mockFunctionsPass: {
+            createWithoutException() {
+                let stub = mockFunction(this);
+            },
+            returnsValueAssignedToReturn() {
+                let stub = mockFunction(this)
+                    .returnValue(0);
+                this.expectEqual(0, stub());
+            },
+        },
+        mockFunctionsFail: {
+            spyWrongNumberOfArguments() {
+                let spy = mockFunction(this)
+                    .expectCall(0);
+                spy();
+            },
+            spyWrongArguments() {
+                let spy = mockFunction(this)
+                    .expectCall(1, 2, 3);
+                spy(4, 5, 6);
             },
         },
     },
