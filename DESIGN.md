@@ -7,23 +7,14 @@ future of this library.
 
 ## Remarks of Current Implementation
 
-Now, the library has a means of writing tests that have better failure messages
-than just saying "an error occurred," along with some more useful functions for
-checking data than `expectEqual`.
-
-What the current implementation is not capable of, however, is the ability to
-test asynchronous code; a core feature of many JavaScript applications. And I
-think this should be the next course of action for the development of this
-library.
+All that is keeping the current implementation from being a full test harness is
+a method to mock functions, and (by extension) methods. Although if an interface
+for function mocking is provided, then method mocking should be trivial.
 
 ## Possible Future Implementations
 
-To modify the current code to support async functions, we should modify the code
-to work with promises instead of just calling the function directly. The first
-change that would have to be made to the existing code would be to give each
-test function its own state object to which the expect functions should bind.
-This is because the current global state model would not support asynchronous tests in the same way
-individualised states would. Then, instead of running each test directly, each
-test would have its promise added to some array. Then, once all the promises are
-resolved, the outputs of the tests are displayed.
+Since all functions and objects are things that are all evaluated at runtime, it
+should be rather trivial to implement this; especially with the help of
+closures, and the current design of the library (what with all the functions
+sharing the `this` object).
 
