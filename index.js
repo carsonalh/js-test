@@ -62,7 +62,7 @@ module.exports.runTestSuite = function(tests) {
         let top = stack[stack.length - 1];
         let i = top.nextIndex;
         if (top.nextIndex < top.items.length) {
-            if (typeof top.items[i].value == 'function') {
+            if (typeof top.items[i].value === 'function') {
                 // Run the test
                 const test = top.items[i].value;
                 const name = test.name;
@@ -83,7 +83,7 @@ module.exports.runTestSuite = function(tests) {
                     result = Promise.resolve(state);
                 }
                 results.push(result);
-            } else if (typeof top.items[i].value == 'object') {
+            } else if (typeof top.items[i].value === 'object') {
                 // This is a test sub-suite, push it to the stack
                 stack.push({
                     items: Object
