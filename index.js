@@ -5,6 +5,51 @@ let state = {
     error: null,
 };
 
+const expects = {
+    expectFalsey(value) {
+        if (!!value) {
+            let message = `[${this.call.name}][expectFalsey]: Expected falsey value, but received ${value}`;
+            this.error.messages.push(message);
+        }
+    },
+    expectTruthy(value) {
+        if (!value) {
+            let message = `[${this.call.name}][expectTruthy]: Expected truthy value, but received ${value}`;
+            this.error.messages.push(message);
+        }
+    },
+    expectLess(threshold, value) {
+        if (value >= threshold) {
+            let message = `[${this.call.name}][expectLess]: Expected less than ${threshold}, but received ${value}`;
+            this.error.messages.push(message);
+        }
+    },
+    expectGreater(threshold, value) {
+        if (value <= threshold) {
+            let message = `[${this.call.name}][expectGreater]: Expected greater than ${threshold}, but received ${value}`;
+            this.error.messages.push(message);
+        }
+    },
+    expectUndefined(value) {
+        if (value !== undefined) {
+            let message = `[${this.call.name}][expectUndefined]: Expected undefined, but received ${value}`;
+            this.error.messages.push(message);
+        }
+    },
+    expectNull(value) {
+        if (value !== null) {
+            let message = `[${this.call.name}][expectNull]: Expected null, but received ${value}`;
+            this.error.messages.push(message);
+        }
+    },
+    expectEqual(expected, actual) {
+        if (expected !== actual) {
+            let message = `[${this.call.name}][expectEqual]: Expected ${expected}, but received ${actual}`;
+            this.error.messages.push(message);
+        }
+    },
+};
+
 module.exports.runTestSuite = function(tests) {
     let stack = [{
         items: Object
@@ -12,6 +57,7 @@ module.exports.runTestSuite = function(tests) {
                 .map(key => ({ key, value: tests[key] })),
         nextIndex: 0,
     }];
+    let results = [];
     while (stack.length > 0) {
         let top = stack[stack.length - 1];
         let i = top.nextIndex;
@@ -25,15 +71,18 @@ module.exports.runTestSuite = function(tests) {
                         .map(el => el.items[el.nextIndex - 1].key)
                         .concat([ name ])
                         .join('::');
+                let state = Object.create(expects);
                 state.call = {
                     name: identifier,
                 };
-                state.error = null;
-                test();
-                // TODO Extract the error handling/reporting later on
-                if (state.error) {
-                    console.log(state.error.message);
+                state.error = { messages: [], };
+                let result = test.call(state);
+                if (result instanceof Promise) {
+                    result = result.then(_ => state);
+                } else {
+                    result = Promise.resolve(state);
                 }
+                results.push(result);
             } else if (typeof top.items[i].value == 'object') {
                 // This is a test sub-suite, push it to the stack
                 stack.push({
@@ -51,54 +100,15 @@ module.exports.runTestSuite = function(tests) {
             stack.pop();
         }
     }
-};
 
-module.exports.expectFalsey = function (value) {
-    if (!!value) {
-        let message = `[${state.call.name}][expectFalsey]: Expected falsey value, but received ${value}`;
-        state.error = { message, };
-    }
-};
-
-module.exports.expectTruthy = function (value) {
-    if (!value) {
-        let message = `[${state.call.name}][expectTruthy]: Expected truthy value, but received ${value}`;
-        state.error = { message, };
-    }
-};
-
-module.exports.expectLess = function (threshold, value) {
-    if (value >= threshold) {
-        let message = `[${state.call.name}][expectLess]: Expected less than ${threshold}, but received ${value}`;
-        state.error = { message, };
-    }
-};
-
-module.exports.expectGreater = function (threshold, value) {
-    if (value <= threshold) {
-        let message = `[${state.call.name}][expectGreater]: Expected greater than ${threshold}, but received ${value}`;
-        state.error = { message, };
-    }
-};
-
-module.exports.expectUndefined = function (value) {
-    if (value !== undefined) {
-        let message = `[${state.call.name}][expectUndefined]: Expected undefined, but received ${value}`;
-        state.error = { message, };
-    }
-};
-
-module.exports.expectNull = function (value) {
-    if (value !== null) {
-        let message = `[${state.call.name}][expectNull]: Expected null, but received ${value}`;
-        state.error = { message, };
-    }
-};
-
-module.exports.expectEqual = function (expected, actual) {
-    if (expected !== actual) {
-        let message = `[${state.call.name}][expectEqual]: Expected ${expected}, but received ${actual}`;
-        state.error = { message, };
-    }
+    Promise
+            .all(results)
+            .then(values => {
+                for (const v of values) {
+                    for (const m of v.error.messages) {
+                        console.log(m);
+                    }
+                }
+            });
 };
 

@@ -1,60 +1,97 @@
-const {
-    runTestSuite,
-    expectEqual,
-    expectNull,
-    expectUndefined,
-    expectTruthy,
-    expectFalsey,
-    expectGreater,
-    expectLess,
-} = require('.');
+const { runTestSuite } = require('.');
 
 runTestSuite({
     jstest: {
         failure: {
             expectEqual() {
-                expectEqual(-1, 1);
+                this.expectEqual(-1, 1);
             },
             expectNull() {
-                expectNull(undefined);
+                this.expectNull(undefined);
             },
             expectUndefined() {
-                expectUndefined(null);
+                this.expectUndefined(null);
             },
             expectTruthy() {
-                expectTruthy(false);
+                this.expectTruthy(false);
             },
             expectFalsey() {
-                expectFalsey(true);
+                this.expectFalsey(true);
             },
             expectGreater() {
-                expectGreater(0, -1);
+                this.expectGreater(0, -1);
             },
             expectLess() {
-                expectLess(0, 1);
+                this.expectLess(0, 1);
             },
         },
         pass: {
             expectEqual() {
-                expectEqual(0, 0);
+                this.expectEqual(0, 0);
             },
             expectNull() {
-                expectNull(null);
+                this.expectNull(null);
             },
             expectUndefined() {
-                expectUndefined(undefined);
+                this.expectUndefined(undefined);
             },
             expectTruthy() {
-                expectTruthy(true);
+                this.expectTruthy(true);
             },
             expectFalsey() {
-                expectFalsey(false);
+                this.expectFalsey(false);
             },
             expectGreater() {
-                expectGreater(0, 1);
+                this.expectGreater(0, 1);
             },
             expectLess() {
-                expectLess(0, -1);
+                this.expectLess(0, -1);
+            },
+        },
+        asyncPass: {
+            async expectEqual() {
+                this.expectEqual(0, 0);
+            },
+            async expectNull() {
+                this.expectNull(null);
+            },
+            async expectUndefined() {
+                this.expectUndefined(undefined);
+            },
+            async expectTruthy() {
+                this.expectTruthy(true);
+            },
+            async expectFalsey() {
+                this.expectFalsey(false);
+            },
+            async expectGreater() {
+                this.expectGreater(0, 1);
+            },
+            async expectLess() {
+                this.expectLess(0, -1);
+            },
+        },
+        asyncFailure: {
+            async expectEqual() {
+                this.expectEqual(-1, 1);
+            },
+            async expectNull() {
+                this.expectNull(undefined);
+            },
+            async expectUndefined() {
+                this.expectUndefined(null);
+            },
+            async expectTruthy() {
+                this.expectTruthy(false);
+            },
+            async expectFalsey() {
+                this.expectFalsey(true);
+            },
+            async expectGreater() {
+                this.expectGreater(0, -1);
+            },
+            async expectLess() {
+                this.expectLess(0, 1);
             },
         },
     },
