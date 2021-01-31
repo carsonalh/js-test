@@ -51,7 +51,7 @@ module.exports.runTestSuite = function(tests) {
             stack.pop();
         }
     }
-}
+};
 
 module.exports.expectFalsey = function (value) {
     if (!!value) {
